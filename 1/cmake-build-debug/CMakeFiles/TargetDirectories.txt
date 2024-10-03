@@ -1,0 +1,7 @@
+/home/sorin/Desktop/labs/GP_labs/1/cmake-build-debug/CMakeFiles/1.dir
+/home/sorin/Desktop/labs/GP_labs/1/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/sorin/Desktop/labs/GP_labs/1/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/home/sorin/Desktop/labs/GP_labs/1/cmake-build-debug/lib/CMakeFiles/edit_cache.dir
+/home/sorin/Desktop/labs/GP_labs/1/cmake-build-debug/lib/CMakeFiles/rebuild_cache.dir
+/home/sorin/Desktop/labs/GP_labs/1/cmake-build-debug/lib/glm/CMakeFiles/edit_cache.dir
+/home/sorin/Desktop/labs/GP_labs/1/cmake-build-debug/lib/glm/CMakeFiles/rebuild_cache.dir
