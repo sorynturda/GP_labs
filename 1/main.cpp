@@ -9,6 +9,7 @@
 #include <iostream>
 #include "lib/glm/glm.hpp"
 #include "lib/glm/ext.hpp"
+#include "lib/glm/vec4.hpp"
 #include <curses.h>
 #include "GPSLab1.hpp"
 

@@ -6,9 +6,12 @@
 
 #include "GPSLab1.hpp"
 
+#include <algorithm>
+
 namespace gps {
     glm::vec4 TransformPoint(const glm::vec4 &point)
     {
+        glm::vec4 res = glm::rotate(point, glm::radians(45.0f), glm::vec3(1.0f,0.0f, 0.0f));
         return glm::vec4(1.0f);
     }
     
