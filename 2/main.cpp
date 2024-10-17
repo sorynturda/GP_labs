@@ -13,7 +13,6 @@
     #include <GL/glew.h>
 #endif
 
-
 #include <GLFW/glfw3.h>
 
 #include <iostream>
@@ -84,7 +83,7 @@ int main(int argc, const char * argv[]) {
         glfwSwapBuffers(glWindow);
         glfwPollEvents();
     }
-    
+
     cleanup();
     return 0;
 }
