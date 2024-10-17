@@ -10,8 +10,8 @@
     #define GLFW_INCLUDE_GLCOREARB
     #define GL_SILENCE_DEPRECATION
 #else
-    #define GLEW_STATIC
-    #include <GL/glew.h>
+#define GLEW_STATIC
+#include <GL/glew.h>
 #endif
 
 #include <GLFW/glfw3.h>
@@ -24,23 +24,67 @@
 int glWindowWidth = 640;
 int glWindowHeight = 480;
 int retina_width, retina_height;
-GLFWwindow* glWindow = NULL;
+GLFWwindow *glWindow = NULL;
 
 GLuint shaderProgram;
+//coordonatele varfurilor in systemul de coordinate normalizate
+GLfloat vertexCoordinates[] = {
+    -0.5f, 0.5f, 0.0f,
+    0.5f, -0.5f, 0.0f,
+    -0.5f, -0.5f, 0.0f,
+};
 
-void windowResizeCallback(GLFWwindow* window, int width, int height)
-{
+GLfloat vertexCoordinates2[] = {
+    -0.5f, 0.5f, 0.0f,
+    0.5f, -0.5f, 0.0f,
+    0.5f, 0.5f, 0.0f
+};
+GLuint verticesVBO, verticesVBO2;
+GLuint triangleVAO, triangleVAO2;
+
+void windowResizeCallback(GLFWwindow *window, int width, int height) {
     fprintf(stdout, "window resized to width: %d , and height: %d\n", width, height);
     //TODO
 }
 
-void initObjects()
-{
+void initObjects() {
     //TODO
+    //genereaza un ID unic petriangleVAOntru verticesVBO
+    glGenBuffers(1, &verticesVBO);
+    //asociaza buffer-ul verticesVBO variabilei OpenGL GL_ARRAY_BUFFER,
+    //orice referire ulterioara la GL_ARRAY_BUFFER va configura buffer-ul asociat momentan,
+    //care este verticesVBO
+    glBindBuffer(GL_ARRAY_BUFFER, verticesVBO);
+    //copiaza datele in buffer-ul current asociat – specificat prin intermediul primului argument
+    //tipul buffer-ului – al doilea argument specifica dimensiunea (in Bytes) datelor
+    //al treilea argument reprezinta datele pe care vrem sa le trimitem
+    //al patrulea argument specifica modul in care vor fi tratate datele de catre placa video
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexCoordinates), vertexCoordinates, GL_STATIC_DRAW);
+
+    //genereaza un ID unic, care corespunde obiectului triangleVAO
+    glGenVertexArrays(1, &triangleVAO);
+    glBindVertexArray(triangleVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, verticesVBO);
+    //seteaza pointer-ul atributelor de varf
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+    glEnableVertexAttribArray(0);
+    //de-selecteaza obiectul triangleVAO
+    glBindVertexArray(0);
+
+
+    glGenBuffers(1, &verticesVBO2);
+    glBindBuffer(GL_ARRAY_BUFFER, verticesVBO2);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexCoordinates2), vertexCoordinates2, GL_STATIC_DRAW);
+
+    glGenVertexArrays(1, &triangleVAO2);
+    glBindVertexArray(triangleVAO2);
+    glBindBuffer(GL_ARRAY_BUFFER, verticesVBO2);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+    glEnableVertexAttribArray(0);
+    glBindVertexArray(0);
 }
 
-bool initOpenGLWindow()
-{
+bool initOpenGLWindow() {
     if (!glfwInit()) {
         fprintf(stderr, "ERROR: could not start GLFW3\n");
         return false;
@@ -74,8 +118,8 @@ bool initOpenGLWindow()
 #endif
 
     // get version info
-    const GLubyte* renderer = glGetString(GL_RENDERER); // get renderer string
-    const GLubyte* version = glGetString(GL_VERSION); // version as a string
+    const GLubyte *renderer = glGetString(GL_RENDERER); // get renderer string
+    const GLubyte *version = glGetString(GL_VERSION); // version as a string
     printf("Renderer: %s\n", renderer);
     printf("OpenGL version supported %s\n", version);
 
@@ -85,13 +129,38 @@ bool initOpenGLWindow()
     return true;
 }
 
-void renderScene()
-{
+void renderScene() {
     //TODO
+    //initializeaza buffer-ele de culoare si adancime inainte de a rasteriza cadrul curent
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    //defineste culoarea de fundal
+    glClearColor(0.8, 0.8, 0.8, 1.0);
+    //specifica locatia si dimensiunea ferestrei
+    glViewport(0, 0, retina_width, retina_height);
+
+    //proceseaza evenimentele de la tastatura
+    if (glfwGetKey(glWindow, GLFW_KEY_A)) {
+        //TODO
+    }
+
+    if (glfwGetKey(glWindow, GLFW_KEY_D)) {
+        //TODO
+    }
+
+    //activeaza program shader-ul; apeluri ulterioare de rasterizare vor utiliza acest program
+    glUseProgram(shaderProgram);
+
+    //activeaza VAO
+    glBindVertexArray(triangleVAO);
+    //specifica tipul primitiei, indicele de inceput si numarul de indici utilizati pentru rasterizare
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+
+    glBindVertexArray(triangleVAO2);
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+
 }
 
-std::string readShaderFile(std::string fileName)
-{
+std::string readShaderFile(std::string fileName) {
     std::ifstream shaderFile;
     std::string shaderString;
 
@@ -111,22 +180,19 @@ std::string readShaderFile(std::string fileName)
     return shaderString;
 }
 
-void shaderCompileLog(GLuint shaderId)
-{
+void shaderCompileLog(GLuint shaderId) {
     GLint success;
     GLchar infoLog[512];
 
     //check compilation info
     glGetShaderiv(shaderId, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
+    if (!success) {
         glGetShaderInfoLog(shaderId, 512, NULL, infoLog);
         std::cout << "Shader compilation error\n" << infoLog << std::endl;
     }
 }
 
-void shaderLinkLog(GLuint shaderProgramId)
-{
+void shaderLinkLog(GLuint shaderProgramId) {
     GLint success;
     GLchar infoLog[512];
 
@@ -138,13 +204,12 @@ void shaderLinkLog(GLuint shaderProgramId)
     }
 }
 
-GLuint initBasicShader(std::string vertexShaderFileName, std::string fragmentShaderFileName)
-{
+GLuint initBasicShader(std::string vertexShaderFileName, std::string fragmentShaderFileName) {
     GLuint shaderProgram;
 
     //read, parse and compile the vertex shader
     std::string v = readShaderFile(vertexShaderFileName);
-    const GLchar* vertexShaderString = v.c_str();
+    const GLchar *vertexShaderString = v.c_str();
     GLuint vertexShader;
     vertexShader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertexShader, 1, &vertexShaderString, NULL);
@@ -154,7 +219,7 @@ GLuint initBasicShader(std::string vertexShaderFileName, std::string fragmentSha
 
     //read, parse and compile the fragment shader
     std::string f = readShaderFile(fragmentShaderFileName);
-    const GLchar* fragmentShaderString = f.c_str();
+    const GLchar *fragmentShaderString = f.c_str();
     GLuint fragmentShader;
     fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragmentShader, 1, &fragmentShaderString, NULL);
@@ -181,8 +246,7 @@ void cleanup() {
     glfwTerminate();
 }
 
-int main(int argc, const char * argv[]) {
-
+int main(int argc, const char *argv[]) {
     if (!initOpenGLWindow()) {
         glfwTerminate();
         return 1;
