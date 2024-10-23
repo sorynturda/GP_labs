@@ -23,9 +23,14 @@
 
 void cleanup();
 
+GLuint initBasicShader(std::string, std::string);
+
 int glWindowWidth = 640;
 int glWindowHeight = 480;
 int retina_width, retina_height;
+
+bool toggleRed, toggleGreen;
+
 GLFWwindow *glWindow = NULL;
 
 GLuint shaderProgram, shaderProgramButGreen;
@@ -147,7 +152,15 @@ bool initOpenGLWindow() {
     return true;
 }
 
-void renderScene() {
+void initShaderProgramForRed() {
+    shaderProgram = initBasicShader("shaders/shader.vert", "shaders/shader.frag");
+}
+
+void initShaderProgramForGreen() {
+    shaderProgramButGreen = initBasicShader("shaders/shader.vert", "shaders/shader_green.frag");
+}
+
+int renderScene() {
     //TODO
     //initializeaza buffer-ele de culoare si adancime inainte de a rasteriza cadrul curent
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -159,12 +172,16 @@ void renderScene() {
     //proceseaza evenimentele de la tastatura
     if (glfwGetKey(glWindow, GLFW_KEY_A)) {
         //TODO
-        initGreenTriangle();
+        // initGreenTriangle();
+        initShaderProgramForGreen();
+        toggleGreen = !toggleGreen;
     }
 
     if (glfwGetKey(glWindow, GLFW_KEY_D)) {
         //TODO
-        initRedTriangle();
+        // initRedTriangle();
+        toggleRed = !toggleRed;
+        initShaderProgramForRed();
     }
 
     if (glfwGetKey(glWindow, GLFW_KEY_MINUS)) {
@@ -174,9 +191,13 @@ void renderScene() {
 
     if (glfwGetKey(glWindow, GLFW_KEY_ESCAPE)) {
         cleanup();
-        return;
+        return -1;
     }
-
+    if (toggleGreen)
+        initGreenTriangle();
+    if (toggleRed)
+        initRedTriangle();
+    return 0;
 }
 
 std::string readShaderFile(std::string fileName) {
@@ -259,6 +280,7 @@ GLuint initBasicShader(std::string vertexShaderFileName, std::string fragmentSha
     return shaderProgram;
 }
 
+
 void cleanup() {
     glfwDestroyWindow(glWindow);
     //close GL context and any other GLFW resources
@@ -273,12 +295,10 @@ int main(int argc, const char *argv[]) {
 
     initObjects();
 
-    shaderProgram = initBasicShader("shaders/shader.vert", "shaders/shader.frag");
-    shaderProgramButGreen = initBasicShader("shaders/shader.vert", "shaders/shader_green.frag");
 
     while (!glfwWindowShouldClose(glWindow)) {
-        renderScene();
-
+        if (renderScene() == -1)
+            break;
         glfwPollEvents();
         glfwSwapBuffers(glWindow);
     }
