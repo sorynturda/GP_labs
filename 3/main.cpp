@@ -21,12 +21,14 @@
 #include <sstream>
 #include <string>
 
+void cleanup();
+
 int glWindowWidth = 640;
 int glWindowHeight = 480;
 int retina_width, retina_height;
 GLFWwindow *glWindow = NULL;
 
-GLuint shaderProgram;
+GLuint shaderProgram, shaderProgramButGreen;
 //coordonatele varfurilor in systemul de coordinate normalizate
 GLfloat vertexCoordinates[] = {
     -0.5f, 0.5f, 0.0f,
@@ -45,6 +47,22 @@ GLuint triangleVAO, triangleVAO2;
 void windowResizeCallback(GLFWwindow *window, int width, int height) {
     fprintf(stdout, "window resized to width: %d , and height: %d\n", width, height);
     //TODO
+}
+
+void initRedTriangle() {
+    //activeaza program shader-ul; apeluri ulterioare de rasterizare vor utiliza acest program
+    glUseProgram(shaderProgram);
+
+    //activeaza VAO
+    glBindVertexArray(triangleVAO);
+    //specifica tipul primitiei, indicele de inceput si numarul de indici utilizati pentru rasterizare
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+}
+
+void initGreenTriangle() {
+    glUseProgram(shaderProgramButGreen);
+    glBindVertexArray(triangleVAO2);
+    glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 
 void initObjects() {
@@ -141,22 +159,23 @@ void renderScene() {
     //proceseaza evenimentele de la tastatura
     if (glfwGetKey(glWindow, GLFW_KEY_A)) {
         //TODO
+        initGreenTriangle();
     }
 
     if (glfwGetKey(glWindow, GLFW_KEY_D)) {
         //TODO
+        initRedTriangle();
     }
 
-    //activeaza program shader-ul; apeluri ulterioare de rasterizare vor utiliza acest program
-    glUseProgram(shaderProgram);
+    if (glfwGetKey(glWindow, GLFW_KEY_MINUS)) {
+        glWindowHeight++;
+        glWindowWidth++;
+    }
 
-    //activeaza VAO
-    glBindVertexArray(triangleVAO);
-    //specifica tipul primitiei, indicele de inceput si numarul de indici utilizati pentru rasterizare
-    glDrawArrays(GL_TRIANGLES, 0, 3);
-
-    glBindVertexArray(triangleVAO2);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    if (glfwGetKey(glWindow, GLFW_KEY_ESCAPE)) {
+        cleanup();
+        return;
+    }
 
 }
 
@@ -255,6 +274,7 @@ int main(int argc, const char *argv[]) {
     initObjects();
 
     shaderProgram = initBasicShader("shaders/shader.vert", "shaders/shader.frag");
+    shaderProgramButGreen = initBasicShader("shaders/shader.vert", "shaders/shader_green.frag");
 
     while (!glfwWindowShouldClose(glWindow)) {
         renderScene();
@@ -264,6 +284,5 @@ int main(int argc, const char *argv[]) {
     }
 
     cleanup();
-
     return 0;
 }
