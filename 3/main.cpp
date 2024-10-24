@@ -193,10 +193,10 @@ int renderScene() {
         cleanup();
         return -1;
     }
-    if (toggleGreen)
-        initGreenTriangle();
-    if (toggleRed)
-        initRedTriangle();
+    // if (toggleGreen)
+    initGreenTriangle();
+    // if (toggleRed)
+    initRedTriangle();
     return 0;
 }
 
