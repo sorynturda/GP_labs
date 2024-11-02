@@ -9,8 +9,8 @@
 #if defined (__APPLE__)
     #define GLFW_INCLUDE_GLCOREARB
 #else
-    #define GLEW_STATIC
-    #include <GL/glew.h>
+#define GLEW_STATIC
+#include <GL/glew.h>
 #endif
 
 #include <GLFW/glfw3.h>
@@ -20,36 +20,41 @@
 int glWindowWidth = 640;
 int glWindowHeight = 480;
 int retina_width, retina_height;
-GLFWwindow* glWindow = NULL;
+GLFWwindow *glWindow = NULL;
 
 //vertex coordinates in normalized device coordinates
 GLfloat vertexData[] = {
-        0.0f,	0.5f,	0.0f,
-        -0.5f, -0.5f,	0.0f,
-        0.5f, -0.5f,	0.0f
+    //vertex position and vertex color
+    -0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, //2
+    -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f, //3
+    0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, //4
+    0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f, //5
+    0.0f, 0.7f, 0.0f, 0.0f, 1.0f, 0.0f //1
 };
 
+GLuint vertexIndices[] = {
+    0, 3, 4,
+    1, 2, 3,
+    0, 1, 3
+};
 GLuint verticesVBO;
+GLuint verticesEBO;
 GLuint objectVAO;
 
 gps::Shader myCustomShader;
 
-void windowResizeCallback(GLFWwindow* window, int width, int height)
-{
+void windowResizeCallback(GLFWwindow *window, int width, int height) {
     fprintf(stdout, "window resized to width: %d , and height: %d\n", width, height);
     //TODO
 }
 
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
-{
+void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
-        
         glfwSetWindowShouldClose(glWindow, GLFW_TRUE);
     }
 }
 
-void initObjects()
-{
+void initObjects() {
     glGenVertexArrays(1, &objectVAO);
     glBindVertexArray(objectVAO);
 
@@ -57,15 +62,22 @@ void initObjects()
     glBindBuffer(GL_ARRAY_BUFFER, verticesVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
 
+    glGenBuffers(1, &verticesEBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, verticesEBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(vertexIndices), vertexIndices, GL_STATIC_DRAW);
+
     //vertex position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid *) 0);
     glEnableVertexAttribArray(0);
+
+    //vertex colour attribute
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid *) (3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
 
     glBindVertexArray(0);
 }
 
-bool initOpenGLWindow()
-{
+bool initOpenGLWindow() {
     if (!glfwInit()) {
         fprintf(stderr, "ERROR: could not start GLFW3\n");
         return false;
@@ -99,8 +111,8 @@ bool initOpenGLWindow()
 #endif
 
     // get version info
-    const GLubyte* renderer = glGetString(GL_RENDERER); // get renderer string
-    const GLubyte* version = glGetString(GL_VERSION); // version as a string
+    const GLubyte *renderer = glGetString(GL_RENDERER); // get renderer string
+    const GLubyte *version = glGetString(GL_VERSION); // version as a string
     printf("Renderer: %s\n", renderer);
     printf("OpenGL version supported %s\n", version);
 
@@ -110,11 +122,10 @@ bool initOpenGLWindow()
     return true;
 }
 
-void renderScene()
-{
+void renderScene() {
     glClearColor(0.8, 0.8, 0.8, 1.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    
+
     glViewport(0, 0, retina_width, retina_height);
 
     if (glfwGetKey(glWindow, GLFW_KEY_A) == GLFW_PRESS) {
@@ -128,12 +139,10 @@ void renderScene()
     myCustomShader.useShaderProgram();
 
     glBindVertexArray(objectVAO);
-
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDrawElements(GL_TRIANGLES, 9, GL_UNSIGNED_INT, 0);
 }
 
 void cleanup() {
-
     if (verticesVBO) {
         glDeleteBuffers(1, &verticesVBO);
     }
@@ -147,8 +156,7 @@ void cleanup() {
     glfwTerminate();
 }
 
-int main(int argc, const char * argv[]) {
-
+int main(int argc, const char *argv[]) {
     if (!initOpenGLWindow()) {
         glfwTerminate();
         return 1;
