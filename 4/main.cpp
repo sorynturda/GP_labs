@@ -21,7 +21,6 @@ int glWindowWidth = 640;
 int glWindowHeight = 480;
 int retina_width, retina_height;
 GLFWwindow *glWindow = NULL;
-
 //vertex coordinates in normalized device coordinates
 GLfloat vertexData[] = {
     //vertex position and vertex color
@@ -130,10 +129,12 @@ void renderScene() {
 
     if (glfwGetKey(glWindow, GLFW_KEY_A) == GLFW_PRESS) {
         //TODO
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     }
 
     if (glfwGetKey(glWindow, GLFW_KEY_D) == GLFW_PRESS) {
         //TODO
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
 
     myCustomShader.useShaderProgram();
@@ -164,8 +165,14 @@ int main(int argc, const char *argv[]) {
 
     initObjects();
 
+
     myCustomShader.loadShader("shaders/shaderStart.vert", "shaders/shaderStart.frag");
     myCustomShader.useShaderProgram();
+
+
+    GLint uniformColourLocation = glGetUniformLocation(myCustomShader.shaderProgram, "uniformColour");
+    glUniform3f(uniformColourLocation, 0.15f, 0.0f, 0.84);
+
 
     while (!glfwWindowShouldClose(glWindow)) {
         renderScene();

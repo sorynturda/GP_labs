@@ -16,7 +16,7 @@
 #include <GLFW/glfw3.h>
 
 #include <iostream>
-#include <lib/glm/glm.hpp>
+#include <glm/glm.hpp>
 
 const int GL_WINDOW_WIDTH = 640;
 const int GL_WINDOW_HEIGHT = 480;
