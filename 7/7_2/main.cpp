@@ -265,7 +265,7 @@ bool initOpenGLWindow()
 
 void initObjects()
 {
-	teapot.LoadModel("models/teapots/teapot50segU.obj", "models/teapots/");
+	teapot.LoadModel("models/teapots/teapot4segU.obj", "models/teapots/");
 }
 
 void initUniforms()
